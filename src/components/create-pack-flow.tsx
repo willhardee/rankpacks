@@ -1,0 +1,117 @@
+'use client';
+
+import { useMemo, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+
+const templates = [
+  { key: 'snacks', emoji: '🍿', label: 'Snack Showdown', suggestions: ['Chips', 'Cookies', 'Pretzels'] },
+  { key: 'wine', emoji: '🍷', label: 'Wine Night', suggestions: ['Cabernet', 'Rosé', 'Riesling'] },
+  { key: 'fast-food', emoji: '🍔', label: 'Fast Food Faceoff', suggestions: ['Burger', 'Fries', 'Shake'] },
+  { key: 'coffee', emoji: '☕', label: 'Coffee Crawl', suggestions: ['Latte', 'Cold Brew', 'Mocha'] }
+] as const;
+
+export function CreatePackFlow() {
+  const [title, setTitle] = useState('');
+  const [category, setCategory] = useState<(typeof templates)[number]['key'] | 'movies' | 'custom'>('snacks');
+  const [visibility, setVisibility] = useState<'link-only' | 'public'>('link-only');
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+
+  const selectedTemplate = useMemo(
+    () => templates.find((t) => t.key === category) ?? templates[0],
+    [category]
+  );
+
+  return (
+    <form className="space-y-4 rounded-2xl border border-violet-100 bg-white p-4 card-pop" action="/api/packs" method="post">
+      <input type="hidden" name="title" value={title} />
+      <input type="hidden" name="category" value={category} />
+      <input type="hidden" name="visibility" value={visibility} />
+
+      <div className="flex items-center justify-between text-xs font-semibold text-violet-700">
+        <span>Step {step} of 3</span>
+        <div className="flex gap-1">
+          {[1, 2, 3].map((s) => (
+            <span key={s} className={`h-1.5 w-8 rounded-full ${step >= s ? 'bg-violet-500' : 'bg-violet-100'}`} />
+          ))}
+        </div>
+      </div>
+
+      {step === 1 && (
+        <section className="space-y-3">
+          <h2 className="text-lg font-bold text-violet-950">Pick your vibe</h2>
+          <div className="grid grid-cols-2 gap-2">
+            {templates.map((template) => (
+              <button
+                type="button"
+                key={template.key}
+                onClick={() => {
+                  setCategory(template.key);
+                  setTitle((current) => current || `${template.label} Rankings`);
+                }}
+                className={`rounded-xl border p-3 text-left transition hover:-translate-y-0.5 ${category === template.key ? 'border-violet-500 bg-violet-50 soft-ring' : 'border-gray-200'}`}
+              >
+                <p className="text-xl">{template.emoji}</p>
+                <p className="text-sm font-semibold">{template.label}</p>
+              </button>
+            ))}
+          </div>
+          <Button type="button" onClick={() => setStep(2)}>Continue</Button>
+        </section>
+      )}
+
+      {step === 2 && (
+        <section className="space-y-3">
+          <h2 className="text-lg font-bold text-violet-950">Name your pack</h2>
+          <label className="block text-sm font-medium text-gray-700">
+            Pack title
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+              placeholder="Best late-night snacks"
+              className="mt-1"
+            />
+          </label>
+          <p className="rounded-xl bg-violet-50 p-3 text-xs text-gray-600">Suggested items: {selectedTemplate.suggestions.join(', ')}</p>
+          <div className="flex gap-2">
+            <Button type="button" variant="secondary" onClick={() => setStep(1)}>Back</Button>
+            <Button type="button" onClick={() => setStep(3)} disabled={!title.trim()}>Continue</Button>
+          </div>
+        </section>
+      )}
+
+      {step === 3 && (
+        <section className="space-y-3">
+          <h2 className="text-lg font-bold text-violet-950">Choose sharing mode</h2>
+          <div className="grid gap-2">
+            <button
+              type="button"
+              onClick={() => setVisibility('link-only')}
+              className={`rounded-xl border p-3 text-left ${visibility === 'link-only' ? 'border-violet-500 bg-violet-50 soft-ring' : 'border-gray-200'}`}
+            >
+              <p className="font-semibold">🔒 Link-only</p>
+              <p className="text-xs text-gray-600">Only people with your invite link can access.</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setVisibility('public')}
+              className={`rounded-xl border p-3 text-left ${visibility === 'public' ? 'border-violet-500 bg-violet-50 soft-ring' : 'border-gray-200'}`}
+            >
+              <p className="font-semibold">🌎 Public</p>
+              <p className="text-xs text-gray-600">Shows up in Explore and can be shared openly.</p>
+            </button>
+          </div>
+          <div className="rounded-xl border border-violet-100 bg-violet-50 p-3 text-sm text-violet-900">
+            <p className="font-semibold">Ready to launch 🎉</p>
+            <p>{title || 'Untitled pack'} • {category} • {visibility}</p>
+          </div>
+          <div className="flex gap-2">
+            <Button type="button" variant="secondary" onClick={() => setStep(2)}>Back</Button>
+            <Button type="submit">Create my pack</Button>
+          </div>
+        </section>
+      )}
+    </form>
+  );
+}
