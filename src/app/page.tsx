@@ -2,20 +2,40 @@ import Link from 'next/link';
 import { AppShell } from '@/components/app-shell';
 import { Button } from '@/components/ui/button';
 
+const highlights = [
+  { title: '⚡ 2-minute setup', detail: 'Start from snack, wine, or fast-food templates.' },
+  { title: '🎯 Friendly competition', detail: 'See taste twins, streaks, and most-controversial picks.' },
+  { title: '📲 Built to share', detail: 'Mobile-first flow with one-tap invite links and share cards.' }
+];
+
 export default function LandingPage() {
   return (
     <AppShell>
-      <section className="space-y-6">
-        <h1 className="text-4xl font-bold">RankPacks helps groups decide faster.</h1>
-        <p className="text-gray-600">Create snack, wine, fast-food, or custom packs. Invite friends. Rank quickly. Reveal consensus and share the results.</p>
-        <Link href="/packs/new"><Button>Create a pack</Button></Link>
-        <div className="rounded-lg border bg-white p-4">
+      <section className="space-y-6 card-pop">
+        <div className="inline-flex items-center rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold text-violet-800">Now in private beta</div>
+        <h1 className="text-4xl font-extrabold tracking-tight text-violet-950">Rank anything with friends — and make it fun.</h1>
+        <p className="text-gray-700">Build a pack, invite your crew, race to rank, and reveal consensus with playful insights your group actually wants to share.</p>
+        <div className="flex gap-3">
+          <Link href="/packs/new"><Button>Create a pack</Button></Link>
+          <Link href="/explore"><Button variant="secondary">Explore packs</Button></Link>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-3">
+          {highlights.map((item) => (
+            <article key={item.title} className="rounded-2xl border border-violet-100 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+              <h2 className="font-semibold text-violet-900">{item.title}</h2>
+              <p className="mt-1 text-sm text-gray-600">{item.detail}</p>
+            </article>
+          ))}
+        </div>
+
+        <div className="rounded-2xl border border-violet-100 bg-white p-4">
           <h2 className="font-semibold">How it works</h2>
-          <ol className="list-decimal space-y-1 pl-5 text-sm text-gray-600">
-            <li>Create your pack and add items.</li>
-            <li>Invite friends by link or email.</li>
-            <li>Everyone ranks and submits.</li>
-            <li>Reveal consensus ranking + insights.</li>
+          <ol className="mt-2 grid gap-2 text-sm text-gray-700 sm:grid-cols-2">
+            <li className="rounded-xl bg-violet-50 p-3">1. Create your pack from a template.</li>
+            <li className="rounded-xl bg-violet-50 p-3">2. Invite by link or email.</li>
+            <li className="rounded-xl bg-violet-50 p-3">3. Rank with drag-and-drop or tap controls.</li>
+            <li className="rounded-xl bg-violet-50 p-3">4. Reveal results and share instantly.</li>
           </ol>
         </div>
       </section>
