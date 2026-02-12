@@ -50,3 +50,19 @@ Set `BETA_MODE=true` to require allowlist/invite code logic before signup.
 ## Known assumptions
 - This repo includes production-oriented scaffolding and core routes; wire the Supabase queries in each route handler for your project IDs.
 - Rate limiting uses an in-memory fallback; replace with Redis/KV in production.
+
+
+## Supabase OAuth setup (Google/Facebook)
+1. In Supabase Dashboard → **Authentication** → **URL Configuration**:
+   - Set **Site URL** to your app URL (`https://YOUR-VERCEL-DOMAIN` in prod).
+   - Add Redirect URLs exactly:
+     - `http://localhost:3000/auth/callback`
+     - `https://YOUR-VERCEL-DOMAIN/auth/callback`
+2. In Supabase Dashboard → **Authentication** → **Providers**:
+   - Enable **Google** provider and add Google OAuth Client ID + Secret.
+   - (Optional) Enable **Facebook** provider and add Facebook App ID + Secret.
+3. In Google/Facebook developer console, add callback URL exactly:
+   - `https://<your-supabase-project-ref>.supabase.co/auth/v1/callback`
+4. Ensure `NEXT_PUBLIC_APP_URL` matches your environment URL so OAuth `redirectTo` works.
+5. Verify flow:
+   - Open `/login`, click Continue with Google, complete provider flow, confirm redirect lands on `/auth/callback` then `/home` (or requested `next` route).

@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { AuthButtons } from '@/components/auth-buttons';
+import { supabaseBrowser } from '@/lib/supabase';
 
 type Item = { id: string; name: string };
 
@@ -9,6 +11,7 @@ export function RankingClient({ initialItems, packId }: { initialItems: Item[]; 
   const [items, setItems] = useState(initialItems);
   const [message, setMessage] = useState<string>('');
   const [submitting, setSubmitting] = useState(false);
+  const [showSavePrompt, setShowSavePrompt] = useState(false);
 
   useEffect(() => {
     try {
@@ -81,6 +84,12 @@ export function RankingClient({ initialItems, packId }: { initialItems: Item[]; 
         body: JSON.stringify({ packId, orderedItemIds: items.map((i) => i.id), submit: true })
       });
       setMessage('Ranking submitted');
+
+      const supabase = supabaseBrowser();
+      const { data } = await supabase.auth.getUser();
+      if (!data.user) {
+        setShowSavePrompt(true);
+      }
     } catch {
       setMessage('Submission failed, try again');
     } finally {
@@ -138,6 +147,16 @@ export function RankingClient({ initialItems, packId }: { initialItems: Item[]; 
         <Button type="button" variant="secondary" onClick={submitRanking} disabled={submitting}>Submit ranking</Button>
       </div>
       {message ? <p className="text-xs text-neutral-600 dark:text-neutral-400">{message}</p> : null}
+
+      {showSavePrompt ? (
+        <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-3 dark:border-indigo-900 dark:bg-indigo-950/40">
+          <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-200">Save your ranking</p>
+          <p className="mt-1 text-xs text-indigo-800 dark:text-indigo-300">Continue as guest or sign in to keep this ranking synced to your account.</p>
+          <div className="mt-2">
+            <AuthButtons next={`/p/${packId}`} compact />
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

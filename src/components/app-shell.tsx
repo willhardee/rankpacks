@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Bell, Compass, House, LayoutGrid, SquarePlus } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { AccountMenu } from '@/components/account-menu';
 import { cn } from '@/lib/utils';
 
 const iconClass = 'h-4 w-4';
@@ -32,6 +33,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </Link>
             </nav>
             <ThemeToggle />
+            <AccountMenu />
           </div>
         </div>
       </header>
