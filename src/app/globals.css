@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  @apply min-h-screen bg-neutral-100 text-foreground;
+}
+
+.safe-area-bottom {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 0.75rem);
+}
+
+.card-pop {
+  animation: card-pop 260ms ease-out;
+}
+
+@keyframes card-pop {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.soft-ring {
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+}
