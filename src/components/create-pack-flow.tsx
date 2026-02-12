@@ -5,10 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 const templates = [
-  { key: 'snacks', emoji: '🍿', label: 'Snack Showdown', suggestions: ['Chips', 'Cookies', 'Pretzels'] },
-  { key: 'wine', emoji: '🍷', label: 'Wine Night', suggestions: ['Cabernet', 'Rosé', 'Riesling'] },
-  { key: 'fast-food', emoji: '🍔', label: 'Fast Food Faceoff', suggestions: ['Burger', 'Fries', 'Shake'] },
-  { key: 'coffee', emoji: '☕', label: 'Coffee Crawl', suggestions: ['Latte', 'Cold Brew', 'Mocha'] }
+  { key: 'snacks', emoji: '🍿', label: 'Snack Showdown', suggestions: ['Chips', 'Cookies', 'Pretzels'], energy: 'high' },
+  { key: 'wine', emoji: '🍷', label: 'Wine Night', suggestions: ['Cabernet', 'Rosé', 'Riesling'], energy: 'chill' },
+  { key: 'fast-food', emoji: '🍔', label: 'Fast Food Faceoff', suggestions: ['Burger', 'Fries', 'Shake'], energy: 'chaotic' },
+  { key: 'coffee', emoji: '☕', label: 'Coffee Crawl', suggestions: ['Latte', 'Cold Brew', 'Mocha'], energy: 'focused' }
+] as const;
+
+const moods = [
+  { id: 'casual', label: 'Casual 🫶' },
+  { id: 'competitive', label: 'Competitive 🏁' },
+  { id: 'chaotic', label: 'Chaotic 🤯' }
 ] as const;
 
 export function CreatePackFlow() {
@@ -16,6 +22,7 @@ export function CreatePackFlow() {
   const [category, setCategory] = useState<(typeof templates)[number]['key'] | 'movies' | 'custom'>('snacks');
   const [visibility, setVisibility] = useState<'link-only' | 'public'>('link-only');
   const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [mood, setMood] = useState<(typeof moods)[number]['id']>('casual');
 
   const selectedTemplate = useMemo(
     () => templates.find((t) => t.key === category) ?? templates[0],
@@ -32,7 +39,7 @@ export function CreatePackFlow() {
         <span>Step {step} of 3</span>
         <div className="flex gap-1">
           {[1, 2, 3].map((s) => (
-            <span key={s} className={`h-1.5 w-8 rounded-full ${step >= s ? 'bg-violet-500' : 'bg-violet-100'}`} />
+            <span key={s} className={`h-1.5 w-8 rounded-full transition ${step >= s ? 'bg-violet-500' : 'bg-violet-100'}`} />
           ))}
         </div>
       </div>
@@ -53,8 +60,24 @@ export function CreatePackFlow() {
               >
                 <p className="text-xl">{template.emoji}</p>
                 <p className="text-sm font-semibold">{template.label}</p>
+                <p className="text-xs text-gray-500">Energy: {template.energy}</p>
               </button>
             ))}
+          </div>
+          <div className="rounded-xl bg-violet-50 p-3">
+            <p className="text-xs font-semibold text-violet-700">Choose a room mood</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {moods.map((entry) => (
+                <button
+                  key={entry.id}
+                  type="button"
+                  onClick={() => setMood(entry.id)}
+                  className={`rounded-full px-3 py-1 text-xs font-semibold transition ${mood === entry.id ? 'bg-violet-600 text-white' : 'bg-white text-violet-700 border border-violet-200'}`}
+                >
+                  {entry.label}
+                </button>
+              ))}
+            </div>
           </div>
           <Button type="button" onClick={() => setStep(2)}>Continue</Button>
         </section>
@@ -74,6 +97,9 @@ export function CreatePackFlow() {
             />
           </label>
           <p className="rounded-xl bg-violet-50 p-3 text-xs text-gray-600">Suggested items: {selectedTemplate.suggestions.join(', ')}</p>
+          <div className="rounded-xl border border-violet-100 bg-white p-3 text-xs text-violet-900">
+            Mood: <span className="font-semibold">{moods.find((entry) => entry.id === mood)?.label}</span>
+          </div>
           <div className="flex gap-2">
             <Button type="button" variant="secondary" onClick={() => setStep(1)}>Back</Button>
             <Button type="button" onClick={() => setStep(3)} disabled={!title.trim()}>Continue</Button>
@@ -105,6 +131,7 @@ export function CreatePackFlow() {
           <div className="rounded-xl border border-violet-100 bg-violet-50 p-3 text-sm text-violet-900">
             <p className="font-semibold">Ready to launch 🎉</p>
             <p>{title || 'Untitled pack'} • {category} • {visibility}</p>
+            <p className="text-xs text-violet-700">Mood: {moods.find((entry) => entry.id === mood)?.label}</p>
           </div>
           <div className="flex gap-2">
             <Button type="button" variant="secondary" onClick={() => setStep(2)}>Back</Button>

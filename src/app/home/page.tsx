@@ -1,11 +1,17 @@
 import Link from 'next/link';
 import { AppShell } from '@/components/app-shell';
 import { Button } from '@/components/ui/button';
+import { StickyTip } from '@/components/sticky-tip';
 
 const quests = [
   'Create 1 new pack this week',
   'Invite 3 friends to active packs',
   'Reveal one result and share it'
+];
+
+const rivalries = [
+  { name: 'Alex', insight: 'Usually loves spicy picks 🌶️' },
+  { name: 'Sam', insight: 'Always picks the wildcard 🎲' }
 ];
 
 export default function HomePage() {
@@ -21,6 +27,8 @@ export default function HomePage() {
             <Button variant="secondary">View streaks</Button>
           </div>
         </div>
+
+        <StickyTip title="Keep the streak alive" body="Invite one friend after every reveal to boost pack completion rates." />
 
         <div className="grid gap-4 md:grid-cols-2">
           <section className="rounded-2xl border border-violet-100 bg-white p-4">
@@ -43,6 +51,18 @@ export default function HomePage() {
             {quests.map((quest) => (
               <li key={quest} className="flex items-center gap-2 rounded-lg bg-violet-50 px-3 py-2 text-sm text-gray-700">
                 <span aria-hidden>⬜</span>{quest}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="rounded-2xl border border-violet-100 bg-white p-4">
+          <h2 className="font-medium text-violet-900">Friendly rivalries</h2>
+          <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+            {rivalries.map((rival) => (
+              <li key={rival.name} className="rounded-xl border border-violet-100 bg-violet-50 p-3 text-sm text-violet-950">
+                <p className="font-semibold">{rival.name}</p>
+                <p className="text-violet-800">{rival.insight}</p>
               </li>
             ))}
           </ul>
