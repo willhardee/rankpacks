@@ -1,0 +1,1 @@
+export default function GuidelinesPage() { return <main className="mx-auto max-w-2xl p-6"><h1 className="text-2xl font-semibold">Content Guidelines</h1><p className="mt-4 text-sm text-gray-600">No harassment, hate, or spam. Report problematic comments.</p></main>; }
