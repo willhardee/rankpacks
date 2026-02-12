@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { AppShell } from '@/components/app-shell';
 import { Button } from '@/components/ui/button';
+import { FunBadge } from '@/components/fun-badge';
+import { StickyTip } from '@/components/sticky-tip';
 
 const highlights = [
   { title: '⚡ 2-minute setup', detail: 'Start from snack, wine, or fast-food templates.' },
@@ -12,13 +14,15 @@ export default function LandingPage() {
   return (
     <AppShell>
       <section className="space-y-6 card-pop">
-        <div className="inline-flex items-center rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold text-violet-800">Now in private beta</div>
+        <FunBadge />
         <h1 className="text-4xl font-extrabold tracking-tight text-violet-950">Rank anything with friends — and make it fun.</h1>
         <p className="text-gray-700">Build a pack, invite your crew, race to rank, and reveal consensus with playful insights your group actually wants to share.</p>
         <div className="flex gap-3">
           <Link href="/packs/new"><Button>Create a pack</Button></Link>
           <Link href="/explore"><Button variant="secondary">Explore packs</Button></Link>
         </div>
+
+        <StickyTip title="Pro tip" body="Public packs grow faster. Start link-only, then flip public when you're ready to attract more votes." />
 
         <div className="grid gap-3 sm:grid-cols-3">
           {highlights.map((item) => (
