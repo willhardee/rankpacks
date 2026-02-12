@@ -4,9 +4,9 @@ import { cn } from '@/lib/utils';
 type Variant = 'primary' | 'secondary' | 'ghost';
 
 const variantClasses: Record<Variant, string> = {
-  primary: 'bg-indigo-600 text-white hover:bg-indigo-700 active:bg-indigo-800 offset-shadow',
-  secondary: 'border border-neutral-300 bg-white text-neutral-900 hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800',
-  ghost: 'bg-transparent text-indigo-700 hover:bg-indigo-50 dark:text-indigo-300 dark:hover:bg-indigo-950/40'
+  primary: 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 offset-shadow',
+  secondary: 'border border-sky-200 bg-white text-slate-900 hover:bg-sky-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800',
+  ghost: 'bg-transparent text-blue-700 hover:bg-sky-100 dark:text-blue-300 dark:hover:bg-slate-800'
 };
 
 export function Button({ className, children, variant = 'primary', ...props }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant }) {

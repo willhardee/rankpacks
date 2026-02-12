@@ -11,7 +11,7 @@
 }
 
 body {
-  @apply min-h-screen bg-neutral-100 text-foreground dark:bg-neutral-950 dark:text-neutral-100;
+  @apply min-h-screen bg-sky-50 text-foreground dark:bg-slate-950 dark:text-slate-100;
 }
 
 .safe-area-bottom {
@@ -34,13 +34,13 @@ body {
 }
 
 .soft-ring {
-  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
 }
 
 .offset-shadow {
-  box-shadow: 4px 4px 0 rgba(31, 41, 55, 0.18);
+  box-shadow: 4px 4px 0 rgba(14, 116, 144, 0.16);
 }
 
 .dark .offset-shadow {
-  box-shadow: 4px 4px 0 rgba(15, 23, 42, 0.6);
+  box-shadow: 4px 4px 0 rgba(15, 23, 42, 0.7);
 }
