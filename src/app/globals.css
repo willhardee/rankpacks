@@ -6,8 +6,12 @@
   color-scheme: light;
 }
 
+.dark {
+  color-scheme: dark;
+}
+
 body {
-  @apply min-h-screen bg-neutral-100 text-foreground;
+  @apply min-h-screen bg-neutral-100 text-foreground dark:bg-neutral-950 dark:text-neutral-100;
 }
 
 .safe-area-bottom {
@@ -31,4 +35,12 @@ body {
 
 .soft-ring {
   box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+}
+
+.offset-shadow {
+  box-shadow: 4px 4px 0 rgba(31, 41, 55, 0.18);
+}
+
+.dark .offset-shadow {
+  box-shadow: 4px 4px 0 rgba(15, 23, 42, 0.6);
 }

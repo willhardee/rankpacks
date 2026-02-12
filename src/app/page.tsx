@@ -18,11 +18,11 @@ const friendsActivity = [
 export default function DashboardPage() {
   return (
     <AppShell>
-      <section className="card-pop rounded-xl border border-neutral-200 bg-white p-5">
+      <section className="card-pop rounded-xl border border-neutral-200 bg-white p-5 offset-shadow dark:border-neutral-800 dark:bg-neutral-900">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-semibold text-neutral-900">Product dashboard</h1>
-            <p className="mt-1 text-sm text-neutral-600">Track what is trending, start a new pack, and follow friend activity.</p>
+            <h1 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-100">Dashboard</h1>
+            <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">See what is trending, start a new rank pack, and stay synced with your circle.</p>
           </div>
           <FunBadge />
         </div>
@@ -33,23 +33,23 @@ export default function DashboardPage() {
       </section>
 
       <section className="grid gap-4 md:grid-cols-2">
-        <article className="rounded-xl border border-neutral-200 bg-white p-4">
-          <h2 className="text-base font-semibold text-neutral-900">Trending packs</h2>
+        <article className="rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+          <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">Trending packs</h2>
           <ul className="mt-3 space-y-2">
             {trendingPacks.map((pack) => (
-              <li key={pack.title} className="rounded-lg border border-neutral-200 bg-neutral-50 p-3">
-                <p className="text-sm font-medium text-neutral-900">{pack.title}</p>
-                <p className="text-xs text-neutral-600">{pack.members} members · {pack.status}</p>
+              <li key={pack.title} className="rounded-lg border border-neutral-200 bg-neutral-50 p-3 dark:border-neutral-700 dark:bg-neutral-800">
+                <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">{pack.title}</p>
+                <p className="text-xs text-neutral-600 dark:text-neutral-400">{pack.members} members · {pack.status}</p>
               </li>
             ))}
           </ul>
         </article>
 
-        <article className="rounded-xl border border-neutral-200 bg-white p-4">
-          <h2 className="text-base font-semibold text-neutral-900">Friends activity</h2>
+        <article className="rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+          <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">Friends activity</h2>
           <ul className="mt-3 space-y-2">
             {friendsActivity.map((item) => (
-              <li key={item} className="rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-sm text-neutral-700">{item}</li>
+              <li key={item} className="rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-sm text-neutral-700 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">{item}</li>
             ))}
           </ul>
         </article>
