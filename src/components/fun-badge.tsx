@@ -3,10 +3,10 @@
 import { useEffect, useState } from 'react';
 
 const messages = [
-  '🔥 Hot streak ready',
-  '🎉 New pack, new champion',
-  '⚡ Fast reveal mode',
-  '🏆 Friendly rivalry enabled'
+  'Trending now',
+  'New packs today',
+  'Fast reveal mode',
+  'Friends active'
 ];
 
 export function FunBadge() {
@@ -21,7 +21,7 @@ export function FunBadge() {
   }, []);
 
   return (
-    <div aria-live="polite" className="inline-flex min-h-8 items-center rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold text-violet-800 transition-all duration-300">
+    <div aria-live="polite" className="inline-flex min-h-8 items-center rounded-full bg-neutral-200 px-3 py-1 text-xs font-medium text-neutral-700 transition-all duration-300">
       {messages[index]}
     </div>
   );

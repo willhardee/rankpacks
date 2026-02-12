@@ -5,16 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 const templates = [
-  { key: 'snacks', emoji: '🍿', label: 'Snack Showdown', suggestions: ['Chips', 'Cookies', 'Pretzels'], energy: 'high' },
-  { key: 'wine', emoji: '🍷', label: 'Wine Night', suggestions: ['Cabernet', 'Rosé', 'Riesling'], energy: 'chill' },
-  { key: 'fast-food', emoji: '🍔', label: 'Fast Food Faceoff', suggestions: ['Burger', 'Fries', 'Shake'], energy: 'chaotic' },
-  { key: 'coffee', emoji: '☕', label: 'Coffee Crawl', suggestions: ['Latte', 'Cold Brew', 'Mocha'], energy: 'focused' }
+  { key: 'snacks', label: 'Snack Showdown', suggestions: ['Chips', 'Cookies', 'Pretzels'], energy: 'high' },
+  { key: 'wine', label: 'Wine Night', suggestions: ['Cabernet', 'Rose', 'Riesling'], energy: 'chill' },
+  { key: 'fast-food', label: 'Fast Food Faceoff', suggestions: ['Burger', 'Fries', 'Shake'], energy: 'chaotic' },
+  { key: 'coffee', label: 'Coffee Crawl', suggestions: ['Latte', 'Cold Brew', 'Mocha'], energy: 'focused' }
 ] as const;
 
 const moods = [
-  { id: 'casual', label: 'Casual 🫶' },
-  { id: 'competitive', label: 'Competitive 🏁' },
-  { id: 'chaotic', label: 'Chaotic 🤯' }
+  { id: 'casual', label: 'Casual' },
+  { id: 'competitive', label: 'Competitive' },
+  { id: 'chaotic', label: 'Chaotic' }
 ] as const;
 
 export function CreatePackFlow() {
@@ -57,23 +57,23 @@ export function CreatePackFlow() {
   );
 
   return (
-    <form className="space-y-4 rounded-2xl border border-violet-100 bg-white p-4 card-pop" action="/api/packs" method="post">
+    <form className="space-y-4 rounded-xl border border-neutral-200 bg-white p-4 card-pop" action="/api/packs" method="post">
       <input type="hidden" name="title" value={title} />
       <input type="hidden" name="category" value={category} />
       <input type="hidden" name="visibility" value={visibility} />
 
-      <div className="flex items-center justify-between text-xs font-semibold text-violet-700">
+      <div className="flex items-center justify-between text-xs font-semibold text-indigo-700">
         <span>Step {step} of 3</span>
         <div className="flex gap-1" aria-hidden>
           {[1, 2, 3].map((s) => (
-            <span key={s} className={`h-1.5 w-8 rounded-full transition ${step >= s ? 'bg-violet-500' : 'bg-violet-100'}`} />
+            <span key={s} className={`h-1.5 w-8 rounded-full transition ${step >= s ? 'bg-indigo-600' : 'bg-neutral-200'}`} />
           ))}
         </div>
       </div>
 
       {step === 1 && (
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-violet-950">Pick your vibe</h2>
+          <h2 className="text-lg font-bold text-neutral-900">Pick your vibe</h2>
           <div className="grid grid-cols-2 gap-2">
             {templates.map((template) => (
               <button
@@ -83,23 +83,22 @@ export function CreatePackFlow() {
                   setCategory(template.key);
                   setTitle((current) => current || `${template.label} Rankings`);
                 }}
-                className={`rounded-xl border p-3 text-left transition hover:-translate-y-0.5 ${category === template.key ? 'border-violet-500 bg-violet-50 soft-ring' : 'border-gray-200'}`}
+                className={`rounded-xl border p-3 text-left transition hover:-translate-y-0.5 ${category === template.key ? 'border-indigo-600 bg-neutral-50 soft-ring' : 'border-gray-200'}`}
               >
-                <p className="text-xl">{template.emoji}</p>
-                <p className="text-sm font-semibold">{template.label}</p>
+<p className="text-sm font-semibold">{template.label}</p>
                 <p className="text-xs text-gray-500">Energy: {template.energy}</p>
               </button>
             ))}
           </div>
-          <div className="rounded-xl bg-violet-50 p-3">
-            <p className="text-xs font-semibold text-violet-700">Choose a room mood</p>
+          <div className="rounded-xl bg-neutral-50 p-3">
+            <p className="text-xs font-semibold text-indigo-700">Choose a room mood</p>
             <div className="mt-2 flex flex-wrap gap-2">
               {moods.map((entry) => (
                 <button
                   key={entry.id}
                   type="button"
                   onClick={() => setMood(entry.id)}
-                  className={`rounded-full px-3 py-1 text-xs font-semibold transition ${mood === entry.id ? 'bg-violet-600 text-white' : 'bg-white text-violet-700 border border-violet-200'}`}
+                  className={`rounded-full px-3 py-1 text-xs font-semibold transition ${mood === entry.id ? 'bg-indigo-600 text-white' : 'bg-white text-indigo-700 border border-neutral-300'}`}
                 >
                   {entry.label}
                 </button>
@@ -112,7 +111,7 @@ export function CreatePackFlow() {
 
       {step === 2 && (
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-violet-950">Name your pack</h2>
+          <h2 className="text-lg font-bold text-neutral-900">Name your pack</h2>
           <label className="block text-sm font-medium text-gray-700">
             Pack title
             <Input
@@ -123,8 +122,8 @@ export function CreatePackFlow() {
               className="mt-1"
             />
           </label>
-          <p className="rounded-xl bg-violet-50 p-3 text-xs text-gray-600">Suggested items: {selectedTemplate.suggestions.join(', ')}</p>
-          <div className="rounded-xl border border-violet-100 bg-white p-3 text-xs text-violet-900">
+          <p className="rounded-xl bg-neutral-50 p-3 text-xs text-gray-600">Suggested items: {selectedTemplate.suggestions.join(', ')}</p>
+          <div className="rounded-xl border border-neutral-200 bg-white p-3 text-xs text-neutral-900">
             Mood: <span className="font-semibold">{moods.find((entry) => entry.id === mood)?.label}</span>
           </div>
           <div className="flex gap-2">
@@ -136,29 +135,29 @@ export function CreatePackFlow() {
 
       {step === 3 && (
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-violet-950">Choose sharing mode</h2>
+          <h2 className="text-lg font-bold text-neutral-900">Choose sharing mode</h2>
           <div className="grid gap-2">
             <button
               type="button"
               onClick={() => setVisibility('link-only')}
-              className={`rounded-xl border p-3 text-left ${visibility === 'link-only' ? 'border-violet-500 bg-violet-50 soft-ring' : 'border-gray-200'}`}
+              className={`rounded-xl border p-3 text-left ${visibility === 'link-only' ? 'border-indigo-600 bg-neutral-50 soft-ring' : 'border-gray-200'}`}
             >
-              <p className="font-semibold">🔒 Link-only</p>
+              <p className="font-semibold">Link-only</p>
               <p className="text-xs text-gray-600">Only people with your invite link can access.</p>
             </button>
             <button
               type="button"
               onClick={() => setVisibility('public')}
-              className={`rounded-xl border p-3 text-left ${visibility === 'public' ? 'border-violet-500 bg-violet-50 soft-ring' : 'border-gray-200'}`}
+              className={`rounded-xl border p-3 text-left ${visibility === 'public' ? 'border-indigo-600 bg-neutral-50 soft-ring' : 'border-gray-200'}`}
             >
-              <p className="font-semibold">🌎 Public</p>
+              <p className="font-semibold">Public</p>
               <p className="text-xs text-gray-600">Shows up in Explore and can be shared openly.</p>
             </button>
           </div>
-          <div className="rounded-xl border border-violet-100 bg-violet-50 p-3 text-sm text-violet-900">
-            <p className="font-semibold">Ready to launch 🎉</p>
+          <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-3 text-sm text-neutral-900">
+            <p className="font-semibold">Ready to launch</p>
             <p>{title || 'Untitled pack'} • {category} • {visibility}</p>
-            <p className="text-xs text-violet-700">Mood: {moods.find((entry) => entry.id === mood)?.label}</p>
+            <p className="text-xs text-indigo-700">Mood: {moods.find((entry) => entry.id === mood)?.label}</p>
           </div>
           <div className="flex gap-2">
             <Button type="button" variant="secondary" onClick={() => setStep(2)}>Back</Button>

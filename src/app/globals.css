@@ -7,11 +7,7 @@
 }
 
 body {
-  @apply min-h-screen text-foreground;
-  background:
-    radial-gradient(circle at 12% 10%, rgba(168, 85, 247, 0.16), transparent 40%),
-    radial-gradient(circle at 85% 90%, rgba(79, 70, 229, 0.12), transparent 35%),
-    #fafafa;
+  @apply min-h-screen bg-neutral-100 text-foreground;
 }
 
 .safe-area-bottom {
@@ -19,24 +15,20 @@ body {
 }
 
 .card-pop {
-  animation: card-pop 320ms ease-out;
+  animation: card-pop 260ms ease-out;
 }
 
 @keyframes card-pop {
   from {
     opacity: 0;
-    transform: translateY(8px) scale(0.98);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 
-.gradient-badge {
-  background: linear-gradient(90deg, #7c3aed 0%, #4f46e5 100%);
-}
-
 .soft-ring {
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
 }
