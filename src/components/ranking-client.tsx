@@ -1,10 +1,36 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 
-export function RankingClient({ initialItems }: { initialItems: { id: string; name: string }[] }) {
+type Item = { id: string; name: string };
+
+export function RankingClient({ initialItems, packId }: { initialItems: Item[]; packId: string }) {
   const [items, setItems] = useState(initialItems);
+  const [message, setMessage] = useState<string>('');
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(`rankpacks.ranking.${packId}`);
+      if (!raw) return;
+      const orderedIds = JSON.parse(raw) as string[];
+      const byId = new Map(initialItems.map((item) => [item.id, item]));
+      const restored = orderedIds.map((id) => byId.get(id)).filter(Boolean) as Item[];
+      if (restored.length === initialItems.length) setItems(restored);
+    } catch {
+      // ignore malformed draft
+    }
+  }, [initialItems, packId]);
+
+  const persistDraft = (nextItems: Item[]) => {
+    setItems(nextItems);
+    try {
+      window.localStorage.setItem(`rankpacks.ranking.${packId}`, JSON.stringify(nextItems.map((i) => i.id)));
+    } catch {
+      // ignore storage failures
+    }
+  };
 
   const move = (index: number, delta: number) => {
     const target = index + delta;
@@ -12,7 +38,7 @@ export function RankingClient({ initialItems }: { initialItems: { id: string; na
     const next = [...items];
     const [item] = next.splice(index, 1);
     next.splice(target, 0, item);
-    setItems(next);
+    persistDraft(next);
   };
 
   const onDragStart = (e: React.DragEvent<HTMLLIElement>, index: number) => {
@@ -25,35 +51,78 @@ export function RankingClient({ initialItems }: { initialItems: { id: string; na
     const next = [...items];
     const [dragged] = next.splice(start, 1);
     next.splice(index, 0, dragged);
-    setItems(next);
+    persistDraft(next);
   };
 
   const quickAssistEnabled = items.length > 15;
   const completion = useMemo(() => Math.round((items.length / Math.max(initialItems.length, 1)) * 100), [items.length, initialItems.length]);
 
+  const saveDraft = async () => {
+    setMessage('Saving draft...');
+    try {
+      await fetch('/api/rankings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ packId, orderedItemIds: items.map((i) => i.id), submit: false })
+      });
+      setMessage('Draft saved');
+    } catch {
+      setMessage('Draft saved locally');
+    }
+  };
+
+  const submitRanking = async () => {
+    setSubmitting(true);
+    setMessage('Submitting ranking...');
+    try {
+      await fetch('/api/rankings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ packId, orderedItemIds: items.map((i) => i.id), submit: true })
+      });
+      setMessage('Ranking submitted');
+    } catch {
+      setMessage('Submission failed, try again');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const pickTopFive = () => {
+    const next = [...items].sort((a, b) => a.name.localeCompare(b.name));
+    persistDraft(next);
+    setMessage('Quick assist applied: top-first alphabetical pass');
+  };
+
+  const pickBottomFive = () => {
+    const next = [...items].sort((a, b) => b.name.localeCompare(a.name));
+    persistDraft(next);
+    setMessage('Quick assist applied: bottom-first alphabetical pass');
+  };
+
   return (
     <div className="space-y-3">
-      <div className="rounded-xl border border-violet-100 bg-violet-50 p-3 text-sm text-violet-900">
+      <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-3 text-sm text-neutral-800 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200">
         <p className="font-semibold">Ranking progress</p>
-        <div className="mt-2 h-2 overflow-hidden rounded-full bg-violet-100">
-          <div className="h-full bg-violet-500 transition-all" style={{ width: `${completion}%` }} />
+        <div className="mt-2 h-2 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700">
+          <div className="h-full bg-indigo-600 transition-all" style={{ width: `${completion}%` }} />
         </div>
       </div>
 
       {quickAssistEnabled && (
-        <div className="rounded-xl border border-violet-100 bg-white p-3 text-sm">
-          <p className="font-semibold text-violet-900">Quick Assist</p>
-          <p className="text-xs text-gray-600">Start with top 5 and bottom 5 picks, then refine.</p>
+        <div className="rounded-xl border border-neutral-200 bg-white p-3 text-sm dark:border-neutral-700 dark:bg-neutral-900">
+          <p className="font-semibold text-neutral-900 dark:text-neutral-100">Quick Assist</p>
+          <p className="text-xs text-neutral-600 dark:text-neutral-400">Start with top 5 and bottom 5 picks, then refine.</p>
           <div className="mt-2 flex gap-2">
-            <Button type="button" variant="secondary">Pick top 5</Button>
-            <Button type="button" variant="secondary">Pick bottom 5</Button>
+            <Button type="button" variant="secondary" onClick={pickTopFive}>Pick top 5</Button>
+            <Button type="button" variant="secondary" onClick={pickBottomFive}>Pick bottom 5</Button>
           </div>
         </div>
       )}
 
       <ul className="space-y-2">
         {items.map((item, index) => (
-          <li key={item.id} draggable onDragStart={(e) => onDragStart(e, index)} onDragOver={(e) => e.preventDefault()} onDrop={(e) => onDrop(e, index)} className="rounded-xl border border-gray-200 bg-white p-3 transition hover:shadow-sm">
+          <li key={item.id} draggable onDragStart={(e) => onDragStart(e, index)} onDragOver={(e) => e.preventDefault()} onDrop={(e) => onDrop(e, index)} className="rounded-xl border border-neutral-200 bg-white p-3 transition hover:shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
             <div className="flex items-center justify-between gap-3">
               <span className="font-medium">#{index + 1} {item.name}</span>
               <div className="flex gap-2">
@@ -65,9 +134,10 @@ export function RankingClient({ initialItems }: { initialItems: { id: string; na
         ))}
       </ul>
       <div className="flex gap-2">
-        <Button type="button" onClick={() => navigator.clipboard.writeText(JSON.stringify(items.map((i) => i.id)))}>Save draft order</Button>
-        <Button type="button" variant="secondary">Submit ranking</Button>
+        <Button type="button" onClick={saveDraft}>Save draft</Button>
+        <Button type="button" variant="secondary" onClick={submitRanking} disabled={submitting}>Submit ranking</Button>
       </div>
+      {message ? <p className="text-xs text-neutral-600 dark:text-neutral-400">{message}</p> : null}
     </div>
   );
 }
