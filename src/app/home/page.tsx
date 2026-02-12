@@ -28,7 +28,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <StickyTip title="Keep the streak alive" body="Invite one friend after every reveal to boost pack completion rates." />
+        <StickyTip storageKey="home-streak-tip" title="Keep the streak alive" body="Invite one friend after every reveal to boost pack completion rates." />
 
         <div className="grid gap-4 md:grid-cols-2">
           <section className="rounded-2xl border border-violet-100 bg-white p-4">

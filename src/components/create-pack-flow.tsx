@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -24,6 +24,33 @@ export function CreatePackFlow() {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [mood, setMood] = useState<(typeof moods)[number]['id']>('casual');
 
+  useEffect(() => {
+    try {
+      const draft = window.localStorage.getItem('rankpacks.createPackDraft');
+      if (!draft) return;
+      const parsed = JSON.parse(draft) as {
+        title?: string;
+        category?: typeof category;
+        visibility?: typeof visibility;
+        mood?: typeof mood;
+      };
+      if (parsed.title) setTitle(parsed.title);
+      if (parsed.category) setCategory(parsed.category);
+      if (parsed.visibility) setVisibility(parsed.visibility);
+      if (parsed.mood) setMood(parsed.mood);
+    } catch {
+      // ignore malformed draft
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem('rankpacks.createPackDraft', JSON.stringify({ title, category, visibility, mood }));
+    } catch {
+      // ignore storage failures
+    }
+  }, [title, category, visibility, mood]);
+
   const selectedTemplate = useMemo(
     () => templates.find((t) => t.key === category) ?? templates[0],
     [category]
@@ -37,7 +64,7 @@ export function CreatePackFlow() {
 
       <div className="flex items-center justify-between text-xs font-semibold text-violet-700">
         <span>Step {step} of 3</span>
-        <div className="flex gap-1">
+        <div className="flex gap-1" aria-hidden>
           {[1, 2, 3].map((s) => (
             <span key={s} className={`h-1.5 w-8 rounded-full transition ${step >= s ? 'bg-violet-500' : 'bg-violet-100'}`} />
           ))}

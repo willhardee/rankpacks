@@ -22,7 +22,7 @@ export default function LandingPage() {
           <Link href="/explore"><Button variant="secondary">Explore packs</Button></Link>
         </div>
 
-        <StickyTip title="Pro tip" body="Public packs grow faster. Start link-only, then flip public when you're ready to attract more votes." />
+        <StickyTip storageKey="landing-pro-tip" title="Pro tip" body="Public packs grow faster. Start link-only, then flip public when you're ready to attract more votes." />
 
         <div className="grid gap-3 sm:grid-cols-3">
           {highlights.map((item) => (
