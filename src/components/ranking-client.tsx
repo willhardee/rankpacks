@@ -1,160 +1,118 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { AuthButtons } from '@/components/auth-buttons';
 import { supabaseBrowser } from '@/lib/supabase';
+import { AuthButtons } from '@/components/auth-buttons';
 
 type Item = { id: string; name: string };
 
-export function RankingClient({ initialItems, packId }: { initialItems: Item[]; packId: string }) {
-  const [items, setItems] = useState(initialItems);
-  const [message, setMessage] = useState<string>('');
+export function RankingClient({ packId, initialItems }: { packId: string; initialItems: Item[] }) {
+  const router = useRouter();
+  const [items, setItems] = useState<Item[]>(initialItems);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [showSavePrompt, setShowSavePrompt] = useState(false);
 
+  useEffect(() => setItems(initialItems), [initialItems]);
+
   useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(`rankpacks.ranking.${packId}`);
-      if (!raw) return;
-      const orderedIds = JSON.parse(raw) as string[];
+    const load = async () => {
+      const supabase = supabaseBrowser();
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (!token) return;
+      const res = await fetch(`/api/rankings?packId=${packId}`, { headers: { Authorization: `Bearer ${token}` } });
+      const body = await res.json();
+      const orderedIds = body.ranking?.ordered_item_ids as string[] | undefined;
+      if (!orderedIds?.length) return;
       const byId = new Map(initialItems.map((item) => [item.id, item]));
-      const restored = orderedIds.map((id) => byId.get(id)).filter(Boolean) as Item[];
-      if (restored.length === initialItems.length) setItems(restored);
-    } catch {
-      // ignore malformed draft
-    }
+      const reordered = orderedIds.map((id) => byId.get(id)).filter(Boolean) as Item[];
+      if (reordered.length === initialItems.length) setItems(reordered);
+    };
+    load();
   }, [initialItems, packId]);
 
-  const persistDraft = (nextItems: Item[]) => {
-    setItems(nextItems);
-    try {
-      window.localStorage.setItem(`rankpacks.ranking.${packId}`, JSON.stringify(nextItems.map((i) => i.id)));
-    } catch {
-      // ignore storage failures
-    }
-  };
+  const completion = useMemo(() => Math.min(100, Math.round((items.length / Math.max(initialItems.length, 1)) * 100)), [items.length, initialItems.length]);
 
-  const move = (index: number, delta: number) => {
-    const target = index + delta;
+  const persist = (next: Item[]) => setItems(next);
+  const move = (index: number, offset: number) => {
+    const target = index + offset;
     if (target < 0 || target >= items.length) return;
     const next = [...items];
-    const [item] = next.splice(index, 1);
-    next.splice(target, 0, item);
-    persistDraft(next);
+    const [entry] = next.splice(index, 1);
+    next.splice(target, 0, entry);
+    persist(next);
   };
 
-  const onDragStart = (e: React.DragEvent<HTMLLIElement>, index: number) => {
-    e.dataTransfer.setData('text/plain', String(index));
-  };
-
-  const onDrop = (e: React.DragEvent<HTMLLIElement>, index: number) => {
-    const start = Number(e.dataTransfer.getData('text/plain'));
-    if (Number.isNaN(start) || start === index) return;
+  const onDragStart = (_event: React.DragEvent<HTMLLIElement>, index: number) => setDragIndex(index);
+  const onDrop = (_event: React.DragEvent<HTMLLIElement>, index: number) => {
+    if (dragIndex === null || dragIndex === index) return;
     const next = [...items];
-    const [dragged] = next.splice(start, 1);
-    next.splice(index, 0, dragged);
-    persistDraft(next);
+    const [entry] = next.splice(dragIndex, 1);
+    next.splice(index, 0, entry);
+    persist(next);
+    setDragIndex(null);
   };
 
-  const quickAssistEnabled = items.length > 15;
-  const completion = useMemo(() => Math.round((items.length / Math.max(initialItems.length, 1)) * 100), [items.length, initialItems.length]);
-
-  const saveDraft = async () => {
-    setMessage('Saving draft...');
-    try {
-      await fetch('/api/rankings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ packId, orderedItemIds: items.map((i) => i.id), submit: false })
-      });
-      setMessage('Draft saved');
-    } catch {
-      setMessage('Draft saved locally');
-    }
-  };
-
-  const submitRanking = async () => {
+  const send = async (submit: boolean) => {
     setSubmitting(true);
-    setMessage('Submitting ranking...');
-    try {
-      await fetch('/api/rankings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ packId, orderedItemIds: items.map((i) => i.id), submit: true })
-      });
-      setMessage('Ranking submitted');
-
-      const supabase = supabaseBrowser();
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) {
-        setShowSavePrompt(true);
-      }
-    } catch {
-      setMessage('Submission failed, try again');
-    } finally {
+    const supabase = supabaseBrowser();
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    if (!token) {
+      setShowSavePrompt(true);
+      router.push(`/login?next=/p/${packId}`);
       setSubmitting(false);
+      return;
     }
-  };
 
-  const pickTopFive = () => {
-    const next = [...items].sort((a, b) => a.name.localeCompare(b.name));
-    persistDraft(next);
-    setMessage('Quick assist applied: top-first alphabetical pass');
-  };
+    const res = await fetch('/api/rankings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ packId, orderedItemIds: items.map((i) => i.id), submit })
+    });
 
-  const pickBottomFive = () => {
-    const next = [...items].sort((a, b) => b.name.localeCompare(a.name));
-    persistDraft(next);
-    setMessage('Quick assist applied: bottom-first alphabetical pass');
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ error: 'Submission failed' }));
+      setMessage(body.error ?? 'Submission failed');
+      setSubmitting(false);
+      return;
+    }
+
+    setMessage(submit ? 'Ranking submitted' : 'Draft saved');
+    setSubmitting(false);
+    if (submit) router.push(`/results/${packId}`);
   };
 
   return (
     <div className="space-y-3">
-      <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-3 text-sm text-neutral-800 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200">
-        <p className="font-semibold">Ranking progress</p>
-        <div className="mt-2 h-2 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700">
-          <div className="h-full bg-indigo-600 transition-all" style={{ width: `${completion}%` }} />
-        </div>
-      </div>
-
-      {quickAssistEnabled && (
-        <div className="rounded-xl border border-neutral-200 bg-white p-3 text-sm dark:border-neutral-700 dark:bg-neutral-900">
-          <p className="font-semibold text-neutral-900 dark:text-neutral-100">Quick Assist</p>
-          <p className="text-xs text-neutral-600 dark:text-neutral-400">Start with top 5 and bottom 5 picks, then refine.</p>
-          <div className="mt-2 flex gap-2">
-            <Button type="button" variant="secondary" onClick={pickTopFive}>Pick top 5</Button>
-            <Button type="button" variant="secondary" onClick={pickBottomFive}>Pick bottom 5</Button>
-          </div>
-        </div>
-      )}
-
+      <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-3 text-sm">Ranking progress: {completion}%</div>
       <ul className="space-y-2">
         {items.map((item, index) => (
-          <li key={item.id} draggable onDragStart={(e) => onDragStart(e, index)} onDragOver={(e) => e.preventDefault()} onDrop={(e) => onDrop(e, index)} className="rounded-xl border border-neutral-200 bg-white p-3 transition hover:shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+          <li key={item.id} draggable onDragStart={(e) => onDragStart(e, index)} onDragOver={(e) => e.preventDefault()} onDrop={(e) => onDrop(e, index)} className="rounded-xl border border-neutral-200 bg-white p-3">
             <div className="flex items-center justify-between gap-3">
               <span className="font-medium">#{index + 1} {item.name}</span>
               <div className="flex gap-2">
-                <Button type="button" variant="secondary" className="px-2 py-1" onClick={() => move(index, -1)} aria-label={`Move ${item.name} up`}>↑</Button>
-                <Button type="button" variant="secondary" className="px-2 py-1" onClick={() => move(index, 1)} aria-label={`Move ${item.name} down`}>↓</Button>
+                <Button type="button" variant="secondary" className="px-2 py-1" onClick={() => move(index, -1)}>↑</Button>
+                <Button type="button" variant="secondary" className="px-2 py-1" onClick={() => move(index, 1)}>↓</Button>
               </div>
             </div>
           </li>
         ))}
       </ul>
       <div className="flex gap-2">
-        <Button type="button" onClick={saveDraft}>Save draft</Button>
-        <Button type="button" variant="secondary" onClick={submitRanking} disabled={submitting}>Submit ranking</Button>
+        <Button type="button" onClick={() => send(false)} disabled={submitting}>Save draft</Button>
+        <Button type="button" variant="secondary" onClick={() => send(true)} disabled={submitting}>Submit ranking</Button>
       </div>
-      {message ? <p className="text-xs text-neutral-600 dark:text-neutral-400">{message}</p> : null}
+      {message ? <p className="text-xs text-neutral-600">{message}</p> : null}
 
       {showSavePrompt ? (
-        <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-3 dark:border-indigo-900 dark:bg-indigo-950/40">
-          <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-200">Save your ranking</p>
-          <p className="mt-1 text-xs text-indigo-800 dark:text-indigo-300">Continue as guest or sign in to keep this ranking synced to your account.</p>
-          <div className="mt-2">
-            <AuthButtons next={`/p/${packId}`} compact />
-          </div>
+        <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-3">
+          <p className="text-sm font-semibold text-indigo-900">Sign in to submit your ranking</p>
+          <div className="mt-2"><AuthButtons next={`/p/${packId}`} compact /></div>
         </div>
       ) : null}
     </div>
