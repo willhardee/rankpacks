@@ -5,7 +5,8 @@ export const packSchema = z.object({
   category: z.enum(['snacks', 'wine', 'fast-food', 'coffee', 'movies', 'custom']),
   visibility: z.enum(['link-only', 'public']),
   location: z.string().max(140).optional(),
-  scheduledFor: z.string().datetime().optional()
+  scheduledFor: z.string().datetime().optional(),
+  items: z.union([z.string(), z.array(z.string())]).optional()
 });
 
 export const commentSchema = z.object({
